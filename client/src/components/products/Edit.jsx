@@ -1,13 +1,12 @@
-import { Button, Form, Input, message, Modal, Table } from "antd";
+import { Button, Form, Input, message, Modal, Select, Table } from "antd";
 import React, { useEffect, useState } from "react";
 
-const Edit = ({
-  isEditModalOpen,
-  setIsEditModalOpen,
-  categories,
-  setCategories,
-}) => {
+const Edit = () => {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState({});
+  const [form] = Form.useForm();
 
   useEffect(() => {
     const getProducts = async () => {
@@ -23,20 +22,43 @@ const Edit = ({
     getProducts();
   }, []);
 
+  useEffect(() => {
+    const getCategories = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/categories/get-all");
+        const data = await res.json();
+        data &&
+          setCategories(
+            data.map((item) => {
+              return { ...item, value: item.title };
+            })
+          );
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    getCategories();
+  }, []);
+
   const onFinish = (values) => {
     console.log(values);
     try {
-      fetch("http://localhost:5000/api/categories/update-category", {
+      fetch("http://localhost:5000/api/products/update-product", {
         method: "PUT",
-        body: JSON.stringify({ ...values }),
+        body: JSON.stringify({ ...values, productId: editingItem._id }),
         headers: { "Content-type": "application/json; charset=UTF-8" },
       });
-      message.success("Kategori başarıyla güncellendi.");
-      setCategories(
-        categories.map((item) => {
+      message.success("Ürün başarıyla güncellendi.");
+      setProducts(
+        products.map((item) => {
+          if (item._id === editingItem._id) {
+            return values;
+          }
           return item;
         })
       );
+      setIsEditModalOpen(false);
     } catch (error) {
       message.error("Bir şeyler yanlış gitti.");
       console.log(error);
@@ -46,13 +68,13 @@ const Edit = ({
   const deleteCategory = (id) => {
     if (window.confirm("Emin misiniz?")) {
       try {
-        fetch("http://localhost:5000/api/categories/delete-category", {
+        fetch("http://localhost:5000/api/products/delete-product", {
           method: "DELETE",
-          body: JSON.stringify({ categoryId: id }),
+          body: JSON.stringify({ productId: id }),
           headers: { "Content-type": "application/json; charset=UTF-8" },
         });
-        message.success("Kategori başarıyla silindi.");
-        setCategories(categories.filter((item) => item._id !== id));
+        message.success("Ürün başarıyla silindi.");
+        setProducts(products.filter((item) => item._id !== id));
       } catch (error) {
         message.error("Bir şeyler yanlış gitti.");
         console.log(error);
@@ -96,7 +118,14 @@ const Edit = ({
       render: (_, record) => {
         return (
           <div>
-            <Button type="link" className="pl-0">
+            <Button
+              type="link"
+              className="pl-0"
+              onClick={() => {
+                setIsEditModalOpen(true);
+                setEditingItem(record);
+              }}
+            >
               Düzenle
             </Button>
             <Button type="link" htmlType="submit" className="text-gray-500">
@@ -116,7 +145,7 @@ const Edit = ({
   ];
 
   return (
-    <Form onFinish={onFinish}>
+    <>
       <Table
         bordered
         dataSource={products}
@@ -127,7 +156,75 @@ const Edit = ({
           y: 600,
         }}
       />
-    </Form>
+      <Modal
+        title="Yeni Ürün Ekle"
+        open={isEditModalOpen}
+        onCancel={() => setIsEditModalOpen(false)}
+        footer={false}
+      >
+        <Form
+          layout="vertical"
+          onFinish={onFinish}
+          form={form}
+          initialValues={editingItem}
+        >
+          <Form.Item
+            name="title"
+            label="Ürün Adı"
+            rules={[
+              { required: true, message: "Ürün Adı Alanı Boş Geçilemez!" },
+            ]}
+          >
+            <Input placeholder="Ürün adı giriniz." />
+          </Form.Item>
+          <Form.Item
+            name="img"
+            label="Ürün Görseli"
+            rules={[
+              { required: true, message: "Ürün Görseli Alanı Boş Geçilemez!" },
+            ]}
+          >
+            <Input placeholder="Ürün görseli giriniz." />
+          </Form.Item>
+          <Form.Item
+            name="price"
+            label="Ürün Fiyatı"
+            rules={[
+              { required: true, message: "Ürün Fiyatı Alanı Boş Geçilemez!" },
+            ]}
+          >
+            <Input placeholder="Ürün fiyatı giriniz." />
+          </Form.Item>
+          <Form.Item
+            name="category"
+            label="Kategori Seç"
+            rules={[
+              { required: true, message: "Kategori Alanı Boş Geçilemez!" },
+            ]}
+          >
+            <Select
+              showSearch
+              placeholder="Search to Select"
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                (option?.title ?? "").includes(input)
+              }
+              filterSort={(optionA, optionB) =>
+                (optionA?.title ?? "")
+                  .toLowerCase()
+                  .localeCompare((optionB?.title ?? "").toLowerCase())
+              }
+              options={categories}
+            />
+          </Form.Item>
+          <Form.Item className="flex justify-end mb-0">
+            <Button type="primary" htmlType="submit">
+              Güncelle
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
   );
 };
 
