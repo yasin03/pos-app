@@ -10,8 +10,12 @@ import {
 } from "@ant-design/icons";
 import React from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const Header = () => {
+
+  const cart = useSelector((state) => state.cart);
+  
   return (
     <div className="px-6 py-4 shadow-md mb-4">
       <header className="header flex justify-between items-center gap-10">
@@ -31,7 +35,7 @@ const Header = () => {
             <HomeOutlined className="md:text-2xl text-xl" />
             <span className="md:text-xs text-[10px]">Ana Sayfa</span>
           </Link>
-          <Badge count={5} className="md:flex hidden">
+          <Badge count={cart.cartItems.length} className="md:flex hidden">
             <Link
               to="/cart"
               className="flex flex-col items-center hover:text-red-600 hover:scale-105 transition-all"

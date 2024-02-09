@@ -128,9 +128,6 @@ const Edit = () => {
             >
               Düzenle
             </Button>
-            <Button type="link" htmlType="submit" className="text-gray-500">
-              Kaydet
-            </Button>
             <Button
               type="link"
               danger
