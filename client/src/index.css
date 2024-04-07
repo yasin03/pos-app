@@ -10,12 +10,17 @@ body {
   @apply bg-gray-50;
 }
 
-  .ant-btn-primary {
-    background-color: #1677ff;
-  }
+.ant-btn-primary {
+  background-color: #1677ff;
+}
 
-@media (min-width: 768px){
-  body{
+.menu-link .anticon {
+  display: flex;
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  body {
     overflow: hidden;
   }
 
