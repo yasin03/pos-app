@@ -7,11 +7,12 @@ import PrintInvoice from "../components/invoice/PrintInvoice.jsx";
 const BillPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [billItems, setBillItems] = useState();
+  const [customer, setCustomer] = useState();
 
   useEffect(() => {
     const getBills = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/bills/get-all");
+        const res = await fetch("http://localhost:5000/api/invoice/get-all");
         const data = await res.json();
         setBillItems(data);
       } catch (error) {
@@ -58,12 +59,15 @@ const BillPage = () => {
       title: "Actions",
       dataIndex: "action",
       key: "action",
-      render: (text) => {
+      render: (_, record) => {
         return (
           <Button
             type="link"
             className="pl-0"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setIsModalOpen(true);
+              setCustomer(record);
+            }}
           >
             Yazdır
           </Button>
@@ -82,9 +86,17 @@ const BillPage = () => {
           columns={columns}
           bordered
           pagination={false}
+          scroll={{
+            x:1000,
+            y:300
+          }}
         />
       </div>
-      <PrintInvoice isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+      <PrintInvoice
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        customer={customer}
+      />
     </>
   );
 };
