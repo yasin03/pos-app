@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import CarouselItem from "../../components/auth/CarouselItem";
+import AuthCarousel from "../../components/auth/AuthCarousel";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -10,24 +11,37 @@ const Login = () => {
 
   const onFinish = async (values) => {
     setLoading(true);
-    try {
-      const res = await fetch(
-        process.env.REACT_APP_SERVER_URL + "/api/auth/register",
-        {
-          method: "POST",
-          body: JSON.stringify(values),
-          headers: { "Content-type": "application/json; charset=UTF-8" },
-        }
-      );
+    navigate("/");
+    /* try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify(values),
+        headers: { "Content-type": "application/json; charset=UTF-8" },
+      });
+
+      const user = await res.json();
+
       if (res.status === 200) {
-        message.success("Kayıt işlemi başarılı.");
-        navigate("/login");
-        setLoading(false);
+        localStorage.setItem(
+          "posUser",
+          JSON.stringify({
+            username: user.username,
+            email: user.email,
+          })
+        );
+        message.success("Giriş işlemi başarılı.");
+        navigate("/");
+      } else if (res.status === 404) {
+        message.error("Kullanıcı bulunamadı!");
+      } else if (res.status === 403) {
+        message.error("Şifre yanlış!");
       }
+      setLoading(false);
     } catch (error) {
       message.error("Bir şeyler yanlış gitti.");
       console.log(error);
-    }
+      setLoading(false);
+    } */
   };
 
   return (
@@ -35,7 +49,13 @@ const Login = () => {
       <div className="flex justify-between h-full">
         <div className="xl:px-20 px-10 w-full flex flex-col h-full justify-center relative">
           <h1 className="text-center text-5xl font-bold mb-2">LOGO</h1>
-          <Form layout="vertical">
+          <Form
+            layout="vertical"
+            onFinish={onFinish}
+            initialValues={{
+              remember: false,
+            }}
+          >
             <Form.Item
               label="E-mail"
               name={"email"}
@@ -72,6 +92,7 @@ const Login = () => {
                 htmlType="submit"
                 className="w-full"
                 size="large"
+                loading={loading}
               >
                 Giriş Yap
               </Button>
@@ -79,31 +100,31 @@ const Login = () => {
           </Form>
           <div className="flex justify-center absolute left-0 bottom-10 w-full">
             Henüz bir hesabınız yok mu?&nbsp;
-            <Link to="/register" className="text-red-600">
+            <Link to="/register" className="text-blue-600">
               Şimdi kaydol
             </Link>
           </div>
         </div>
-        <div className="xl:w-4/6 lg:w-3/5 md:w-1/2 md:flex hidden bg-red-500 h-full">
+        <div className="xl:w-4/6 lg:w-3/5 md:w-1/2 md:flex hidden bg-[#6c63ff] h-full">
           <div className="w-full h-full flex items-center">
             <div className="w-full">
               <Carousel className="!h-full px-6" autoplay>
-                <CarouselItem
+                <AuthCarousel
                   img="/images/responsive.svg"
                   title="Responsive"
                   desc="Tüm Cihaz Boyutlarıyla Uyumluluk"
                 />
-                <CarouselItem
+                <AuthCarousel
                   img="/images/statistic.svg"
                   title="İstatistikler"
                   desc="Geniş Tutulan İstatistikler"
                 />
-                <CarouselItem
+                <AuthCarousel
                   img="/images/customer.svg"
                   title="Müşteri Memnuniyeti"
                   desc="Deneyim Sonunda Üründen Memnun Müşteriler"
                 />
-                <CarouselItem
+                <AuthCarousel
                   img="/images/admin.svg"
                   title="Yönetici Paneli"
                   desc="Tek Yerden Yönetim"
